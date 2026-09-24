@@ -17,6 +17,11 @@ def main():
     if not plots_dir.exists():
         plots_dir.mkdir()
 
+    # Check if models directory exists, if not create it
+    models_dir = current_dir / "models"
+    if not models_dir.exists():
+        models_dir.mkdir()
+
     # Load the dataset
     print("Loading the dataset...")
     data = load_data(data_file)
