@@ -22,17 +22,14 @@ def preprocessing(data):
             1: 'Yes'
         })
  
-    # Fix: TotalCharges is stored as a string with blank entries for
-    # customers with tenure == 0 (brand new accounts). Coerce to numeric
-    # first, THEN drop/impute, otherwise dropna() won't catch the blanks.
+    # Convert "TotalCharges" to numeric form
     if "TotalCharges" in data.columns:
         data["TotalCharges"] = pd.to_numeric(data["TotalCharges"], errors="coerce")
  
     # Drop rows with missing values (now that TotalCharges blanks are NaN)
     data = data.dropna()
  
-    # Drop identifier column — it carries no predictive signal and would
-    # otherwise be one-hot encoded into ~7000 useless columns
+    # Drop customer ID
     data = data.drop(columns=["customerID"], errors="ignore")
  
     # Separate features and target variable
@@ -54,8 +51,7 @@ def preprocessing(data):
         ]
     )
  
-    # Stratify the split: Churn is imbalanced (~73.5% / 26.5%), so
-    # stratifying keeps that ratio consistent in both train and test sets
+    # Stratified split to preserve class ratio
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )

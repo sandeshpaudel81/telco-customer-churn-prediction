@@ -36,8 +36,8 @@ def main():
     print(f"\nDataset shape: {data.shape}")
 
     # Basic data exploration and visualization
-    # print("\nRunning exploratory data analysis...")
-    # explore_data(data, output_dir=plots_dir)
+    print("\nRunning exploratory data analysis...")
+    explore_data(data, output_dir=plots_dir)
 
     # Preprocess the data for modeling
     print("\nPreprocessing data...")
@@ -74,12 +74,12 @@ def main():
     # 7. Display final results
     # --------------------------------------------------
 
-    # print("\nModel Performance")
-    # print("-" * 60)
+    print("\nModel Performance")
+    print("-" * 60)
 
-    # print(results)
+    print(results)
 
-    # print("\nProject completed successfully.")
+    print("\nProject completed successfully.")
 
 if __name__ == "__main__":
     main()
