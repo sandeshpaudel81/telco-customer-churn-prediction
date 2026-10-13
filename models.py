@@ -50,11 +50,11 @@ MODEL_CONFIGS = {
         },
     },
     "ANN (MLP)": {
-        "estimator": MLPClassifier(max_iter=1000, random_state=42),
+        "estimator": MLPClassifier(max_iter=1000, random_state=42, early_stopping=True, n_iter_no_change=20),
         "param_grid": {
             "classifier__hidden_layer_sizes": [(32,), (64, 32), (64, 32, 16)],
             "classifier__activation": ["relu", "tanh"],
-            "classifier__alpha": [0.0001, 0.001],
+            "classifier__alpha": [1e-4, 1e-3, 1e-2],
         },
     },
     "XGBoost": {
@@ -137,7 +137,7 @@ def plot_confusion_matrices(results_cms, output_path="confusion_matrices.png"):
     for ax, (name, cm) in zip(axes, results_cms.items()):
         disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["No Churn", "Churn"])
         disp.plot(ax=ax, colorbar=False, cmap="Blues")
-        ax.set_title(name)
+        ax.set_title(name, fontsize=9)
     plt.tight_layout()
     plt.savefig(output_path)
 
@@ -204,7 +204,7 @@ def train_models(X_train, y_train, preprocessor, cv=5, scoring="f1"):
 
 
 
-def evaluate_models(trained_models, X_test, y_test, results_dir="."):
+def evaluate_models(trained_models, X_test, y_test, results_dir=".", plots_dir="."):
     """
     Score every fitted model from train_models() on the held-out test set
     and save comparison plots/CSV into results_dir.
@@ -236,9 +236,9 @@ def evaluate_models(trained_models, X_test, y_test, results_dir="."):
     print(results_df[["Model", "Base Model", "Balance", "Accuracy", "Precision", "Recall",
                        "F1-Score", "ROC-AUC", "False Negatives", "False Positives"]].to_string(index=False))
  
-    plot_confusion_matrices(confusion_matrices, output_path=results_dir / "confusion_matrices.png")
-    plot_roc_curves(y_test, probabilities, output_path=results_dir / "roc_curves.png")
-    plot_normal_vs_smote(results_df, output_path=results_dir / "normal_vs_smote.png")
+    plot_confusion_matrices(confusion_matrices, output_path=plots_dir / "confusion_matrices.png")
+    plot_roc_curves(y_test, probabilities, output_path=plots_dir / "roc_curves.png")
+    plot_normal_vs_smote(results_df, output_path=plots_dir / "normal_vs_smote.png")
     results_df.to_csv(results_dir / "model_comparison_results.csv", index=False)
  
     return results_df

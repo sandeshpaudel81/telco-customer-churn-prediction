@@ -6,6 +6,8 @@ from utils import load_data
 from eda import explore_data
 from models import train_models, evaluate_models
 from preprocessing import preprocessing as preprocess_data
+from feature_engineering import feature_engineering
+from post_analysis import run_feature_ablation, run_threshold_tuning, run_shap_analysis, run_feature_selection
 
 def main():
     # Set up the environment
@@ -15,13 +17,16 @@ def main():
 
     data_file = current_dir / "data" / "Telco-Customer-Churn.csv"
 
-    plots_dir = current_dir / "plots"
+    eda_plots_dir = current_dir / "plots/eda"
+    model_plots_dir = current_dir / "plots/models"
     models_dir = current_dir / "models"
     results_dir = current_dir / "results"
 
     # Create required directories
-    if not plots_dir.exists():
-        plots_dir.mkdir()
+    if not eda_plots_dir.exists():
+        eda_plots_dir.mkdir(parents=True)
+    if not model_plots_dir.exists():
+        model_plots_dir.mkdir(parents=True)
     if not models_dir.exists():
         models_dir.mkdir()
     if not results_dir.exists():
@@ -37,7 +42,11 @@ def main():
 
     # Basic data exploration and visualization
     print("\nRunning exploratory data analysis...")
-    explore_data(data, output_dir=plots_dir)
+    explore_data(data, output_dir=eda_plots_dir)
+
+    # Create new features from the raw data
+    print("\nEngineering features...")
+    data = feature_engineering(data)
 
     # Preprocess the data for modeling
     print("\nPreprocessing data...")
@@ -66,9 +75,43 @@ def main():
         trained_models,
         X_test,
         y_test,
-        results_dir
+        results_dir,
+        plots_dir=model_plots_dir
     )
 
+    # --------------------------------------------------
+    # 7. Post-training analysis
+    # --------------------------------------------------
+    run_feature_ablation(
+        trained_models,
+        X_train,
+        y_train,
+        plots_dir=model_plots_dir,
+        results_dir=results_dir
+    )
+    run_feature_selection(
+        trained_models,
+        X_train,
+        y_train,
+        results_dir=results_dir
+    )
+    run_threshold_tuning(
+        trained_models,
+        X_train,
+        y_train,
+        X_test, 
+        y_test,
+        results_dir,
+        model_plots_dir
+    )
+    run_shap_analysis(
+        trained_models, 
+        X_test, 
+        y_test, 
+        results_dir,
+        model_plots_dir,
+        model_key="XGBoost (SMOTE)"
+    )
 
     # --------------------------------------------------
     # 7. Display final results
